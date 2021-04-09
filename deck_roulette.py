@@ -1,18 +1,25 @@
 import random
 import os
+import time
+import sys
 
-HS_CLASSES = {
-    1: "ROGUE",
-    2: "MAGE",
-    3: "PALADIN",
-    4: "HUNTER",
-    5: "WARLOCK",
-    6: "WARRIOR",
-    7: "SHAMAN",
-    8: "DEMON HUNTER",
-    9: "DRUID",
-    10: "PRIEST",
-}
+HS_CLASS_NAMES = [
+    "ROGUE",
+    "MAGE",
+    "PALADIN",
+    "HUNTER",
+    "WARLOCK",
+    "WARRIOR",
+    "SHAMAN",
+    "DEMON HUNTER",
+    "DRUID",
+    "PRIEST",
+]
+
+HS_CLASS_STRING = """(1)  ROGUE\n(2)  MAGE\n(3)  PALADIN\n(4)  HUNTER\n(5)  WARLOCK\n
+(6)  WARRIOR\n(7)  SHAMAN\n(8)  DEMON HUNTER\n(9)  DRUID\n(10) PRIEST"""
+
+TRACK_HS_CLASSES = []
 
 
 def clear_console():
@@ -24,32 +31,77 @@ def generate_random_number(start, end):
     return random.randint(start, end)
 
 
-def get_random_HS_class_to_play():
-    number = generate_random_number(1, 10)
-    return HS_CLASSES[number]
+def get_random_HS_class_from(hs_classes):
+    return random.choice(hs_classes)
+
+
+def create_random_HS_class_list_by_player(numbers):
+    temp = []
+    for n in numbers:
+        temp.append(HS_CLASS_NAMES[n - 1])
+    random.shuffle(temp)
+    return temp
 
 
 def print_stars(length):
     print("*" * length)
 
 
-def print_class(padding):
+def print_class(hs_class, padding):
     print_stars(padding)
     print()
-    print(get_random_HS_class_to_play().center(padding))
+    time.sleep(0.5)
+    print(hs_class.center(padding))
     print()
     print_stars(padding)
 
 
 def main():
 
+    print("\n| Select your classes for the roulette! |\n")
+    print(HS_CLASS_STRING)
+    print(
+        "\nType their numbers without spaces or Press Enter to select all of them: ",
+        end='')
+
+    try:
+        user_class_numbers = list(map(int, list(set(input().lower().strip()))))
+    except ValueError:
+        user_class_numbers = []
+
+    hs_classes = HS_CLASS_NAMES.copy(
+    ) if not user_class_numbers else create_random_HS_class_list_by_player(
+        user_class_numbers)
+
+    clear_console()
+
     while True:
-        user_input = input("\nPress enter to get a class:\n")
-        if user_input:
-            break
+        hs_class = get_random_HS_class_from(hs_classes)
+        while True:
+            if TRACK_HS_CLASSES:
+                previous_deck = TRACK_HS_CLASSES[-1]
+            if len(TRACK_HS_CLASSES) > 1 and previous_deck == hs_class and len(
+                    hs_classes) > 1:
+                hs_class = get_random_HS_class_from(hs_classes)
+            else:
+                break
+
+        TRACK_HS_CLASSES.append(hs_class)
+
+        print_class(hs_class, padding=20)
+
+        user_input = input(
+            "\nPress Enter to get another class | 'q' to exit | 'b' to go back\n"
+        ).lower().strip()
+
+        if user_input == 'q':
+            sys.exit()
+
+        if user_input == 'b':
+            clear_console()
+            main()
 
         clear_console()
-        print_class(padding=20)
 
 
 if __name__ == "__main__":
