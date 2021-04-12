@@ -56,52 +56,78 @@ def print_class(hs_class, padding):
     print_stars(padding)
 
 
-def main():
-
+def print_starter_messages():
     print("\n| Select your classes for the roulette! |\n")
     print(HS_CLASS_STRING)
     print(
         "\nType their numbers without spaces or Press Enter to select all of them: ",
         end='')
 
+
+def get_user_numbers():
     try:
-        user_class_numbers = list(map(int, list(set(input().lower().strip()))))
+        user_class_numbers = list(map(int, list(set(prompt_user("")))))
     except ValueError:
         user_class_numbers = []
 
+    return user_class_numbers
+
+
+def get_hs_classes_from(user_numbers):
     hs_classes = HS_CLASS_NAMES.copy(
-    ) if not user_class_numbers else create_random_HS_class_list_by_player(
-        user_class_numbers)
+    ) if not user_numbers else create_random_HS_class_list_by_player(
+        user_numbers)
+    return hs_classes
+
+
+def get_previous_hs_class():
+    if TRACK_HS_CLASSES:
+        return TRACK_HS_CLASSES[-1]
+
+
+def main():
+    print_starter_messages()
+
+    user_numbers = get_user_numbers()
+    hs_classes = get_hs_classes_from(user_numbers)
 
     clear_console()
 
     while True:
-        hs_class = get_random_HS_class_from(hs_classes)
+        current_hs_class = get_random_HS_class_from(hs_classes)
+
         while True:
-            if TRACK_HS_CLASSES:
-                previous_deck = TRACK_HS_CLASSES[-1]
-            if len(TRACK_HS_CLASSES) > 1 and previous_deck == hs_class and len(
-                    hs_classes) > 1:
-                hs_class = get_random_HS_class_from(hs_classes)
+            previous_deck = get_previous_hs_class()
+
+            if len(TRACK_HS_CLASSES
+                   ) > 1 and previous_deck == current_hs_class and len(
+                       hs_classes) > 1:
+                current_hs_class = get_random_HS_class_from(hs_classes)
             else:
                 break
 
-        TRACK_HS_CLASSES.append(hs_class)
+        TRACK_HS_CLASSES.append(current_hs_class)
 
-        print_class(hs_class, padding=20)
+        print_class(current_hs_class, padding=20)
 
-        user_input = input(
+        user_input = prompt_user(
             "\nPress Enter to get another class | 'q' to exit | 'b' to go back\n"
-        ).lower().strip()
+        )
 
-        if user_input == 'q':
-            sys.exit()
-
-        if user_input == 'b':
-            clear_console()
-            main()
-
+        check_user_input(user_input)
         clear_console()
+
+
+def prompt_user(question):
+    return input(question).lower().strip()
+
+
+def check_user_input(user_input):
+    if user_input == "q":
+        sys.exit()
+    if user_input == 'b':
+        clear_console()
+        main()
 
 
 if __name__ == "__main__":
