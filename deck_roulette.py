@@ -60,13 +60,22 @@ def print_starter_messages():
     print("\n| Select your classes for the roulette! |\n")
     print(HS_CLASS_STRING)
     print(
-        "\nType their numbers without spaces or Press Enter to select all of them: ",
+        "\nType their numbers separated by a space or press Enter to select all of them: ",
         end='')
+
+
+def check_number_from(array):
+    for number in array:
+        if not 1 <= number <= 10:
+            raise ValueError
 
 
 def get_user_numbers():
     try:
-        user_class_numbers = list(map(int, list(set(prompt_user("")))))
+        numbers = prompt_user().split(" ")
+        user_class_numbers = list(map(int, list(set(numbers))))
+        check_number_from(user_class_numbers)
+
     except ValueError:
         user_class_numbers = []
 
@@ -81,8 +90,12 @@ def get_hs_classes_from(user_numbers):
 
 
 def get_previous_hs_class():
-    if TRACK_HS_CLASSES:
+    if TRACK_HS_CLASSES and len(TRACK_HS_CLASSES) > 1:
         return TRACK_HS_CLASSES[-1]
+
+
+def has_only_one_element(iterable):
+    return len(iterable) == 1
 
 
 def main():
@@ -97,11 +110,12 @@ def main():
         current_hs_class = get_random_HS_class_from(hs_classes)
 
         while True:
+            if has_only_one_element(hs_classes):
+                break
+
             previous_deck = get_previous_hs_class()
 
-            if len(TRACK_HS_CLASSES
-                   ) > 1 and previous_deck == current_hs_class and len(
-                       hs_classes) > 1:
+            if previous_deck == current_hs_class:
                 current_hs_class = get_random_HS_class_from(hs_classes)
             else:
                 break
@@ -118,7 +132,7 @@ def main():
         clear_console()
 
 
-def prompt_user(question):
+def prompt_user(question=""):
     return input(question).lower().strip()
 
 
